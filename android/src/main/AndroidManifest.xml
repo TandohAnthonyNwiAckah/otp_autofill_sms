@@ -1,3 +1,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-  package="com.tanacom.sms_otp_autofill">
+    package="com.tanacom.sms_otp_autofill">
+
+    <application>
+        <receiver
+            android:name=".SmsReceiver"
+            android:exported="true"
+            android:permission="com.google.android.gms.auth.api.phone.permission.SEND">
+            <intent-filter>
+                <action android:name="com.google.android.gms.auth.api.phone.SMS_RETRIEVED" />
+            </intent-filter>
+        </receiver>
+    </application>
+
 </manifest>

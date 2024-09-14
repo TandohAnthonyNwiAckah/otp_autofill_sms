@@ -1,29 +1,34 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sms_otp_autofill/sms_otp_autofill.dart';
-import 'package:sms_otp_autofill/sms_otp_autofill_platform_interface.dart';
-import 'package:sms_otp_autofill/sms_otp_autofill_method_channel.dart';
-import 'package:plugin_platform_interface/plugin_platform_interface.dart';
-
-class MockSmsOtpAutofillPlatform
-    with MockPlatformInterfaceMixin
-    implements SmsOtpAutofillPlatform {
-
-  @override
-  Future<String?> getPlatformVersion() => Future.value('42');
-}
+import 'package:sms_otp_autofill/src/sms_otp_autofill_method_channel.dart'; // Ensure this import path is correct
 
 void main() {
-  final SmsOtpAutofillPlatform initialPlatform = SmsOtpAutofillPlatform.instance;
+  const MethodChannel channel = MethodChannel('sms_otp_autofill');
 
-  test('$MethodChannelSmsOtpAutofill is the default instance', () {
-    expect(initialPlatform, isInstanceOf<MethodChannelSmsOtpAutofill>());
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  setUp(() {
+    TestWidgetsFlutterBinding.ensureInitialized()
+        .defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+      if (methodCall.method == 'getPlatformVersion') {
+        return '42';
+      }
+      throw PlatformException(
+        code: 'Unimplemented',
+        details: 'The ${methodCall.method} method is not implemented',
+      );
+    });
+  });
+
+  tearDown(() {
+    TestWidgetsFlutterBinding.ensureInitialized()
+        .defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, null);
   });
 
   test('getPlatformVersion', () async {
-    SmsOtpAutofill smsOtpAutofillPlugin = SmsOtpAutofill();
-    MockSmsOtpAutofillPlatform fakePlatform = MockSmsOtpAutofillPlatform();
-    SmsOtpAutofillPlatform.instance = fakePlatform;
-
-    expect(await smsOtpAutofillPlugin.getPlatformVersion(), '42');
+    final version = await SmsAutofill.getPlatformVersion();
+    expect(version, '42');
   });
 }
