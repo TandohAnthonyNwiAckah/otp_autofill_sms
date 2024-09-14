@@ -106,8 +106,8 @@ flutter_test
 3.3
 file:///Users/tanacom/flutter/packages/flutter_test/
 file:///Users/tanacom/flutter/packages/flutter_test/lib/
-sms_otp_autofill
+otp_autofill_sms
 3.5
-file:///Users/tanacom/pp/sms_otp_autofill/
-file:///Users/tanacom/pp/sms_otp_autofill/lib/
+file:///Users/tanacom/pp/otp_autofill_sms/
+file:///Users/tanacom/pp/otp_autofill_sms/lib/
 2

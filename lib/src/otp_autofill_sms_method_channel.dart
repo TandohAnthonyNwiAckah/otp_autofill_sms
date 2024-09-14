@@ -4,8 +4,8 @@ import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-class SmsAutofill {
-  static const MethodChannel _channel = MethodChannel('sms_otp_autofill');
+class OtpAutofillSms {
+  static const MethodChannel _channel = MethodChannel('otp_autofill_sms');
 
   static Future<String?> getPlatformVersion() async {
     final version = await _channel.invokeMethod<String>('getPlatformVersion');

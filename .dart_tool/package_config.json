@@ -164,13 +164,13 @@
       "languageVersion": "3.3"
     },
     {
-      "name": "sms_otp_autofill",
+      "name": "otp_autofill_sms",
       "rootUri": "../",
       "packageUri": "lib/",
       "languageVersion": "3.5"
     }
   ],
-  "generated": "2024-09-11T20:27:37.653538Z",
+  "generated": "2024-09-14T22:18:04.838538Z",
   "generator": "pub",
   "generatorVersion": "3.5.2",
   "flutterRoot": "file:///Users/tanacom/flutter",

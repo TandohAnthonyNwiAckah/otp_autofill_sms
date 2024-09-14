@@ -1,4 +1,4 @@
-package com.tanacom.sms_otp_autofill
+package com.tanacom.otp_autofill_sms
 
 import android.content.BroadcastReceiver
 import android.content.Context

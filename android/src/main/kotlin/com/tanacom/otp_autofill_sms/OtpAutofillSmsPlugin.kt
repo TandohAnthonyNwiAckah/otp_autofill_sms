@@ -1,4 +1,4 @@
-package com.tanacom.sms_otp_autofill
+package com.tanacom.otp_autofill_sms
 
 import android.app.Activity
 import android.content.Context
@@ -24,7 +24,7 @@ import io.flutter.plugin.common.PluginRegistry
 
 
 /** SmsOtpAutofillPlugin **/
-class SmsOtpAutofillPlugin : FlutterPlugin, MethodCallHandler,
+class OtpAutofillSmsPlugin : FlutterPlugin, MethodCallHandler,
     MyListener, ActivityAware {
     private var channel: MethodChannel? = null
     private var pendingResult: MethodChannel.Result? = null
@@ -56,11 +56,11 @@ class SmsOtpAutofillPlugin : FlutterPlugin, MethodCallHandler,
         }
 
     companion object {
-        private const val channelName = "sms_otp_autofill"
+        private const val channelName = "otp_autofill_sms"
         private const val REQUEST_RESOLVE_HINT = 1256
 
         @JvmStatic
-        fun setup(plugin: SmsOtpAutofillPlugin, binaryMessenger: BinaryMessenger) {
+        fun setup(plugin: OtpAutofillSmsPlugin, binaryMessenger: BinaryMessenger) {
             plugin.channel = MethodChannel(binaryMessenger, channelName)
             plugin.channel?.setMethodCallHandler(plugin)
             plugin.binding?.addActivityResultListener(plugin.activityResultListener)

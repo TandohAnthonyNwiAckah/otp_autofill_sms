@@ -1,9 +1,9 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sms_otp_autofill/src/sms_otp_autofill_method_channel.dart'; // Ensure this import path is correct
+import 'package:otp_autofill_sms/src/otp_autofill_sms_method_channel.dart';
 
 void main() {
-  const MethodChannel channel = MethodChannel('sms_otp_autofill');
+  const MethodChannel channel = MethodChannel('otp_autofill_sms');
 
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -28,7 +28,7 @@ void main() {
   });
 
   test('getPlatformVersion', () async {
-    final version = await SmsAutofill.getPlatformVersion();
+    final version = await OtpAutofillSms.getPlatformVersion();
     expect(version, '42');
   });
 }

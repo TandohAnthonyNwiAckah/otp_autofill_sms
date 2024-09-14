@@ -1,4 +1,4 @@
-package com.tanacom.sms_otp_autofill
+package com.tanacom.otp_autofill_sms
 
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -13,10 +13,10 @@ import kotlin.test.Test
  * you can run them directly from IDEs that support JUnit such as Android Studio.
  */
 
-internal class SmsOtpAutofillPluginTest {
+internal class OtpAutofillSmsPluginTest {
     @Test
     fun onMethodCall_getPlatformVersion_returnsExpectedValue() {
-        val plugin = SmsOtpAutofillPlugin()
+        val plugin = OtpAutofillSmsPlugin()
 
         val call = MethodCall("getPlatformVersion", null)
         val mockResult: MethodChannel.Result = Mockito.mock(MethodChannel.Result::class.java)

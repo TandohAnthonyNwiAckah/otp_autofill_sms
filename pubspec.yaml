@@ -1,7 +1,8 @@
-name: sms_otp_autofill
+name: otp_autofill_sms
 description: "A versatile and efficient solution designed to enhance the user experience by automating the process of filling in  OTPs sent via SMS."
-version: 0.0.1
-homepage:
+version: 0.2.2
+homepage: https://github.com/TandohAnthonyNwiAckah/otp_autofill_sms
+
 
 environment:
   sdk: ^3.5.2
@@ -35,8 +36,8 @@ flutter:
   plugin:
     platforms:
       android:
-        package: com.tanacom.sms_otp_autofill
-        pluginClass: SmsOtpAutofillPlugin
+        package: com.tanacom.otp_autofill_sms
+        pluginClass: OtpAutofillSmsPlugin
 
   # To add assets to your plugin package, add an assets section, like this:
   # assets:

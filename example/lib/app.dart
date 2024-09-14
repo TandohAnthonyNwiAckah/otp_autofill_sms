@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:sms_otp_autofill/sms_otp_auto_fill.dart';
+import 'package:otp_autofill_sms/otp_autofill_sms.dart';
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -26,7 +26,7 @@ class MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    initPlatformState();
+    // initPlatformState();
     _getSignatureCode();
     _startListeningSms();
   }
@@ -36,8 +36,8 @@ class MyAppState extends State<MyApp> {
     // Platform messages may fail, so we use a try/catch PlatformException.
     // We also handle the message potentially returning null.
     try {
-      platformVersion =
-          await SmsAutofill.getPlatformVersion() ?? 'Unknown platform version';
+      platformVersion = await OtpAutofillSms.getPlatformVersion() ??
+          'Unknown platform version';
     } on PlatformException {
       platformVersion = 'Failed to get platform version.';
     }
@@ -58,7 +58,7 @@ class MyAppState extends State<MyApp> {
   @override
   void dispose() {
     super.dispose();
-    SmsAutofill.stopListening();
+    OtpAutofillSms.stopListening();
   }
 
   BoxDecoration get _pinPutDecoration {
@@ -70,7 +70,7 @@ class MyAppState extends State<MyApp> {
 
   /// get signature code
   _getSignatureCode() async {
-    String? signature = await SmsAutofill.getAppSignature();
+    String? signature = await OtpAutofillSms.getAppSignature();
     if (kDebugMode) {
       print("signature $signature");
     }
@@ -78,9 +78,9 @@ class MyAppState extends State<MyApp> {
 
   /// listen sms
   _startListeningSms() {
-    SmsAutofill.startListeningSms().then((message) {
+    OtpAutofillSms.startListeningSms().then((message) {
       setState(() {
-        _otpCode = SmsAutofill.getCode(message, intRegex);
+        _otpCode = OtpAutofillSms.getCode(message, intRegex);
         textEditingController.text = _otpCode;
         _onOtpCallBack(_otpCode, true);
       });
@@ -165,11 +165,15 @@ class MyAppState extends State<MyApp> {
                 ),
                 SizedBox(
                   width: double.maxFinite,
-                  child: MaterialButton(
-                    onPressed: _enableButton ? _onSubmitOtp : null,
-                    color: Colors.blue,
-                    disabledColor: Colors.blue[100],
-                    child: _setUpButtonChild(),
+                  height: 80,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: MaterialButton(
+                      onPressed: _enableButton ? _onSubmitOtp : null,
+                      color: Colors.deepOrange,
+                      disabledColor: Colors.deepOrange[100],
+                      child: verifyButton(),
+                    ),
                   ),
                 ),
                 SizedBox(
@@ -178,7 +182,7 @@ class MyAppState extends State<MyApp> {
                     onPressed: _onClickRetry,
                     child: const Text(
                       "Retry",
-                      style: TextStyle(color: Colors.orange),
+                      style: TextStyle(color: Colors.black),
                     ),
                   ),
                 )
@@ -190,7 +194,7 @@ class MyAppState extends State<MyApp> {
     );
   }
 
-  Widget _setUpButtonChild() {
+  Widget verifyButton() {
     if (_isLoadingButton) {
       return const SizedBox(
         width: 19,

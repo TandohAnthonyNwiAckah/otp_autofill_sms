@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.tanacom.sms_otp_autofill">
+    package="com.tanacom.otp_autofill_sms">
 
     <application>
         <receiver
