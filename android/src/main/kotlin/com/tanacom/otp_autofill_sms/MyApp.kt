@@ -14,16 +14,26 @@ import java.security.NoSuchAlgorithmException
 import java.util.Arrays
 
 
-/** MyApp **/
+/**
+ * MyApp
+ * A custom ContextWrapper to handle application-specific context operations.
+ *
+ * @param context The base context to wrap.
+ */
 class MyApp(context: Context) : ContextWrapper(context) {
 
     companion object {
-        val TAG = MyApp::class.java.simpleName
+        val TAG: String = MyApp::class.java.simpleName
         private const val HASH_TYPE = "SHA-256"
         const val NUM_HASHED_BYTES = 9
         const val NUM_BASE64_CHAR = 11
     }
 
+    /**
+     * Retrieves the application signatures.
+     *
+     * @return A list of hashed signatures for the application.
+     */
     fun getAppSignatures(): ArrayList<String> {
         val appCodes = ArrayList<String>()
 
@@ -68,6 +78,14 @@ class MyApp(context: Context) : ContextWrapper(context) {
         }
     }
 
+
+    /**
+     * Hashes the package name and signature.
+     *
+     * @param packageName The package name to hash.
+     * @param signature The signature to hash.
+     * @return A hashed package name and signature.
+     */
     @SuppressLint("NewApi")
     private fun hash(packageName: String, signature: String): String? {
         val appInfo = "$packageName $signature"

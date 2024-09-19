@@ -133,7 +133,7 @@ class MyAppState extends State<MyApp> {
       home: Scaffold(
         key: _scaffoldKey,
         appBar: AppBar(
-          title: const Text('Plugin example app'),
+          title: const Text('OTP autofill sms example'),
         ),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -185,7 +185,7 @@ class MyAppState extends State<MyApp> {
                       style: TextStyle(color: Colors.black),
                     ),
                   ),
-                )
+                ),
               ],
             ),
           ),

@@ -1,6 +1,6 @@
 name: otp_autofill_sms
 description: "A versatile and efficient solution designed to enhance the user experience by automating the process of filling in  OTPs sent via SMS."
-version: 0.2.2
+version: 1.0.0
 homepage: https://github.com/TandohAnthonyNwiAckah/otp_autofill_sms
 
 
@@ -17,6 +17,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
+  lint: ^2.3.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

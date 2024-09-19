@@ -74,6 +74,12 @@
       "languageVersion": "3.2"
     },
     {
+      "name": "lint",
+      "rootUri": "file:///Users/tanacom/.pub-cache/hosted/pub.dev/lint-2.3.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
       "name": "lints",
       "rootUri": "file:///Users/tanacom/.pub-cache/hosted/pub.dev/lints-4.0.0",
       "packageUri": "lib/",
@@ -170,7 +176,7 @@
       "languageVersion": "3.5"
     }
   ],
-  "generated": "2024-09-14T22:18:04.838538Z",
+  "generated": "2024-09-19T14:51:32.149982Z",
   "generator": "pub",
   "generatorVersion": "3.5.2",
   "flutterRoot": "file:///Users/tanacom/flutter",

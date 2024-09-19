@@ -1,5 +1,4 @@
 # otp_autofill_sms_example
-
 Demonstrates how to use the sms_otp_autofill plugin.
 
 ## Getting Started
