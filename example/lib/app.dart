@@ -14,14 +14,16 @@ class MyApp extends StatefulWidget {
 
 class MyAppState extends State<MyApp> {
   // String _platformVersion = 'Unknown';
-
-  final int _otpCodeLength = 4;
-  bool _isLoadingButton = false;
+  final int _otpLength = 6;
+  bool _isLoading = false;
   bool _enableButton = false;
   String _otpCode = "";
   final _scaffoldKey = GlobalKey<ScaffoldState>();
+
   final intRegex = RegExp(r'\d+', multiLine: true);
-  TextEditingController textEditingController = TextEditingController(text: "");
+
+  TextEditingController otpTextFieldController =
+      TextEditingController(text: "");
 
   @override
   void initState() {
@@ -31,6 +33,7 @@ class MyAppState extends State<MyApp> {
     _startListeningSms();
   }
 
+  /// Initialize platform state
   Future<void> initPlatformState() async {
     String platformVersion;
     // Platform messages may fail, so we use a try/catch PlatformException.
@@ -59,16 +62,10 @@ class MyAppState extends State<MyApp> {
   void dispose() {
     super.dispose();
     OtpAutofillSms.stopListening();
+    otpTextFieldController.dispose();
   }
 
-  BoxDecoration get _pinPutDecoration {
-    return BoxDecoration(
-      border: Border.all(color: Theme.of(context).primaryColor),
-      borderRadius: BorderRadius.circular(15.0),
-    );
-  }
-
-  /// get signature code
+  /// Get the app signature code
   _getSignatureCode() async {
     String? signature = await OtpAutofillSms.getAppSignature();
     if (kDebugMode) {
@@ -76,60 +73,65 @@ class MyAppState extends State<MyApp> {
     }
   }
 
-  /// listen sms
+  /// Start listening for SMS messages
   _startListeningSms() {
     OtpAutofillSms.startListeningSms().then((message) {
       setState(() {
         _otpCode = OtpAutofillSms.getCode(message, intRegex);
-        textEditingController.text = _otpCode;
+        otpTextFieldController.text = _otpCode;
         _onOtpCallBack(_otpCode, true);
       });
     });
   }
 
+  /// Handle OTP submission
   _onSubmitOtp() {
     setState(() {
-      _isLoadingButton = !_isLoadingButton;
+      _isLoading = !_isLoading;
       _verifyOtpCode();
     });
   }
 
+  /// Handle OTP submission
   _onClickRetry() {
     _startListeningSms();
   }
 
+  /// Callback for OTP changes
   _onOtpCallBack(String otpCode, bool isAutofill) {
     setState(() {
       _otpCode = otpCode;
-      if (otpCode.length == _otpCodeLength && isAutofill) {
+      if (otpCode.length == _otpLength && isAutofill) {
         _enableButton = false;
-        _isLoadingButton = true;
+        _isLoading = true;
         _verifyOtpCode();
-      } else if (otpCode.length == _otpCodeLength && !isAutofill) {
+      } else if (otpCode.length == _otpLength && !isAutofill) {
         _enableButton = true;
-        _isLoadingButton = false;
+        _isLoading = false;
       } else {
         _enableButton = false;
       }
     });
   }
 
+  /// Verify the OTP code
   _verifyOtpCode() {
     FocusScope.of(context).requestFocus(FocusNode());
     Timer(const Duration(milliseconds: 4000), () {
       setState(() {
-        _isLoadingButton = false;
+        _isLoading = false;
         _enableButton = false;
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Verification OTP Code $_otpCode Success")));
+          SnackBar(content: Text("OTP Code $_otpCode verified successfully")));
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
         key: _scaffoldKey,
         appBar: AppBar(
@@ -137,65 +139,118 @@ class MyAppState extends State<MyApp> {
         ),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                OtpTextField(
-                    textController: textEditingController,
-                    autoFocus: true,
-                    codeLength: _otpCodeLength,
-                    alignment: MainAxisAlignment.center,
-                    defaultBoxSize: 46.0,
-                    margin: 10,
-                    selectedBoxSize: 46.0,
-                    textStyle: const TextStyle(fontSize: 16),
-                    defaultDecoration: _pinPutDecoration.copyWith(
-                        border: Border.all(
-                            color: Theme.of(context)
-                                .primaryColor
-                                .withOpacity(0.6))),
-                    selectedDecoration: _pinPutDecoration,
-                    onChange: (code) {
-                      _onOtpCallBack(code, false);
-                    }),
-                const SizedBox(
-                  height: 32,
-                ),
-                SizedBox(
-                  width: double.maxFinite,
-                  height: 80,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: MaterialButton(
-                      onPressed: _enableButton ? _onSubmitOtp : null,
-                      color: Colors.deepOrange,
-                      disabledColor: Colors.deepOrange[100],
-                      child: verifyButton(),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              const SizedBox(
+                height: 32,
+              ),
+              Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: SizedBox(
+                    width: 200,
+                    height: 200,
+                    child: Image.network(
+                      "https://i.ibb.co/7vGxvTd/ic-verify.png",
+                      fit: BoxFit.fill,
+                    )),
+              ),
+              const SizedBox(
+                height: 32,
+              ),
+              Center(
+                child: Column(
+                  children: [
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 14, left: 47),
+                      child: const Text(
+                        "OTP Verification",
+                        style: TextStyle(
+                          color: Color(0xFF5B5B5B),
+                          fontSize: 36,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-                SizedBox(
-                  width: double.maxFinite,
-                  child: TextButton(
-                    onPressed: _onClickRetry,
-                    child: const Text(
-                      "Retry",
-                      style: TextStyle(color: Colors.black),
+                    const SizedBox(
+                      height: 32,
                     ),
-                  ),
+                    OtpTextField(
+                        textController: otpTextFieldController,
+                        autoFocus: true,
+                        codeLength: _otpLength,
+                        alignment: MainAxisAlignment.center,
+                        defaultBoxSize: 46.0,
+                        margin: 10,
+                        selectedBoxSize: 46.0,
+                        textStyle: const TextStyle(fontSize: 16),
+                        defaultDecoration: _pinPutDecoration.copyWith(
+                            border: Border.all(
+                                color: Theme.of(context)
+                                    .primaryColor
+                                    .withOpacity(0.6))),
+                        selectedDecoration: _pinPutDecoration,
+                        onChange: (code) {
+                          _onOtpCallBack(code, false);
+                        }),
+                    const SizedBox(
+                      height: 8,
+                    ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          "Didn’t you receive the OTP? ",
+                          style: TextStyle(
+                            color: Color(0xFF5B5B5B),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: _onClickRetry,
+                          child: const Text(
+                            "Resend OTP",
+                            style: TextStyle(
+                                color: Colors.blueAccent,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 32,
+                    ),
+                    SizedBox(
+                      width: double.maxFinite,
+                      height: 80,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: MaterialButton(
+                            onPressed: _enableButton ? _onSubmitOtp : null,
+                            color: Colors.deepOrange,
+                            disabledColor: Colors.deepOrange[100],
+                            child: buttonVerify(),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget verifyButton() {
-    if (_isLoadingButton) {
+  /// Widget for the verify button
+  Widget buttonVerify() {
+    if (_isLoading) {
       return const SizedBox(
         width: 19,
         height: 19,
@@ -211,5 +266,13 @@ class MyAppState extends State<MyApp> {
         style: TextStyle(color: Colors.white),
       );
     }
+  }
+
+  /// Decoration for the OTP input fields
+  BoxDecoration get _pinPutDecoration {
+    return BoxDecoration(
+      border: Border.all(color: Theme.of(context).primaryColor),
+      borderRadius: BorderRadius.circular(15.0),
+    );
   }
 }
