@@ -20,9 +20,9 @@ convenience.
 
 ## Screenshots
 
-| Default Screen                            | OTP Autofill                              |
-|-------------------------------------------|-------------------------------------------|
-| ![Main Page](screenshots/screenshot1.png) | ![Main Page](screenshots/screenshot2.png) |
+| Default Screen                   | OTP Autofill                     |
+|----------------------------------|----------------------------------|
+| ![Main Page](screenshots/s1.png) | ![Main Page](screenshots/s2.png) |
 
 ## How It Works
 
