@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:otp_autofill_sms/otp_autofill_sms.dart';
 
 class MyApp extends StatefulWidget {
@@ -105,10 +106,14 @@ class MyAppState extends State<MyApp> {
         _enableButton = false;
         _isLoading = true;
         _verifyOtpCode();
-      } else if (otpCode.length == _otpLength && !isAutofill) {
+      }
+      //
+      else if (otpCode.length == _otpLength && !isAutofill) {
         _enableButton = true;
         _isLoading = false;
-      } else {
+      }
+      //
+      else {
         _enableButton = false;
       }
     });
@@ -117,15 +122,22 @@ class MyAppState extends State<MyApp> {
   /// Verify the OTP code
   _verifyOtpCode() {
     FocusScope.of(context).requestFocus(FocusNode());
+
     Timer(const Duration(milliseconds: 4000), () {
       setState(() {
         _isLoading = false;
         _enableButton = false;
       });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("OTP Code $_otpCode verified successfully")));
     });
+
+    Fluttertoast.showToast(
+        msg: "OTP CODE IS VERIFIED",
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0);
   }
 
   @override
@@ -133,6 +145,7 @@ class MyAppState extends State<MyApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
+        resizeToAvoidBottomInset: false,
         key: _scaffoldKey,
         appBar: AppBar(
           title: const Text('OTP autofill sms example'),
@@ -144,7 +157,7 @@ class MyAppState extends State<MyApp> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               const SizedBox(
-                height: 32,
+                height: 12,
               ),
               Padding(
                 padding: const EdgeInsets.all(10.0),
@@ -157,89 +170,84 @@ class MyAppState extends State<MyApp> {
                     )),
               ),
               const SizedBox(
-                height: 32,
+                height: 12,
               ),
-              Center(
-                child: Column(
-                  children: [
-                    Container(
-                      margin: const EdgeInsets.only(bottom: 14, left: 47),
-                      child: const Text(
-                        "OTP Verification",
+              Column(
+                children: [
+                  const Text(
+                    "OTP Verification",
+                    style: TextStyle(
+                      color: Color(0xFF5B5B5B),
+                      fontSize: 36,
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 22,
+                  ),
+                  OtpTextField(
+                      textController: otpTextFieldController,
+                      autoFocus: true,
+                      codeLength: _otpLength,
+                      alignment: MainAxisAlignment.center,
+                      defaultBoxSize: 35.0,
+                      margin: 10,
+                      selectedBoxSize: 35.0,
+                      textStyle: const TextStyle(fontSize: 16),
+                      defaultDecoration: _pinPutDecoration.copyWith(
+                          border: Border.all(
+                              color: Theme.of(context)
+                                  .primaryColor
+                                  .withOpacity(0.6))),
+                      selectedDecoration: _pinPutDecoration,
+                      onChange: (code) {
+                        _onOtpCallBack(code, false);
+                      }),
+                  const SizedBox(
+                    height: 8,
+                  ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        "Didn’t you receive the OTP? ",
                         style: TextStyle(
                           color: Color(0xFF5B5B5B),
-                          fontSize: 36,
                         ),
                       ),
-                    ),
-                    const SizedBox(
-                      height: 32,
-                    ),
-                    OtpTextField(
-                        textController: otpTextFieldController,
-                        autoFocus: true,
-                        codeLength: _otpLength,
-                        alignment: MainAxisAlignment.center,
-                        defaultBoxSize: 46.0,
-                        margin: 10,
-                        selectedBoxSize: 46.0,
-                        textStyle: const TextStyle(fontSize: 16),
-                        defaultDecoration: _pinPutDecoration.copyWith(
-                            border: Border.all(
-                                color: Theme.of(context)
-                                    .primaryColor
-                                    .withOpacity(0.6))),
-                        selectedDecoration: _pinPutDecoration,
-                        onChange: (code) {
-                          _onOtpCallBack(code, false);
-                        }),
-                    const SizedBox(
-                      height: 8,
-                    ),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text(
-                          "Didn’t you receive the OTP? ",
+                      TextButton(
+                        onPressed: _onClickRetry,
+                        child: const Text(
+                          "Resend OTP",
                           style: TextStyle(
-                            color: Color(0xFF5B5B5B),
-                          ),
+                              color: Colors.blueAccent,
+                              fontWeight: FontWeight.bold),
                         ),
-                        TextButton(
-                          onPressed: _onClickRetry,
-                          child: const Text(
-                            "Resend OTP",
-                            style: TextStyle(
-                                color: Colors.blueAccent,
-                                fontWeight: FontWeight.bold),
-                          ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 22,
+                  ),
+                  SizedBox(
+                    width: double.maxFinite,
+                    height: 80,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
                         ),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 32,
-                    ),
-                    SizedBox(
-                      width: double.maxFinite,
-                      height: 80,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: MaterialButton(
-                            onPressed: _enableButton ? _onSubmitOtp : null,
-                            color: Colors.deepOrange,
-                            disabledColor: Colors.deepOrange[100],
-                            child: buttonVerify(),
-                          ),
+                        child: MaterialButton(
+                          onPressed: _enableButton ? _onSubmitOtp : null,
+                          color: Colors.deepOrange,
+                          disabledColor: Colors.deepOrange[100],
+                          child: buttonVerify(),
                         ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ],
           ),
