@@ -1,5 +1,6 @@
 package com.tanacom.otp_autofill_sms
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -8,9 +9,9 @@ import android.content.IntentSender
 import android.os.Build
 import android.telephony.TelephonyManager
 import android.util.Log
-import com.google.android.gms.auth.api.credentials.Credential
-import com.google.android.gms.auth.api.credentials.Credentials
-import com.google.android.gms.auth.api.credentials.HintRequest
+import com.google.android.gms.auth.api.identity.GetPhoneNumberHintIntentRequest
+import com.google.android.gms.auth.api.identity.Identity
+import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.android.gms.auth.api.phone.SmsRetriever
 import com.google.android.gms.auth.api.phone.SmsRetrieverClient
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -22,10 +23,12 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.PluginRegistry
 
+/**
+ * OtpAutofillSmsPlugin
+ * A Flutter plugin to handle OTP autofill via SMS and phone number hint retrieval.
+ */
+class OtpAutofillSmsPlugin : FlutterPlugin, MethodCallHandler, MyListener, ActivityAware {
 
-/** SmsOtpAutofillPlugin **/
-class OtpAutofillSmsPlugin : FlutterPlugin, MethodCallHandler,
-    MyListener, ActivityAware {
     private var channel: MethodChannel? = null
     private var pendingResult: MethodChannel.Result? = null
     private var receiver: SmsReceiver? = null
@@ -33,7 +36,12 @@ class OtpAutofillSmsPlugin : FlutterPlugin, MethodCallHandler,
     private var client: SmsRetrieverClient? = null
     private var activity: Activity? = null
     private var binding: ActivityPluginBinding? = null
+    private var oneTapClient: SignInClient? = null
 
+
+    /**
+     * Listener for activity result to handle phone number hint selection.
+     */
     private val activityResultListener: PluginRegistry.ActivityResultListener =
         object : PluginRegistry.ActivityResultListener {
             override fun onActivityResult(
@@ -43,8 +51,8 @@ class OtpAutofillSmsPlugin : FlutterPlugin, MethodCallHandler,
             ): Boolean {
                 if (requestCode == REQUEST_RESOLVE_HINT) {
                     if (resultCode == Activity.RESULT_OK && data != null) {
-                        val credential: Credential? = data.getParcelableExtra(Credential.EXTRA_KEY)
-                        val phoneNumber: String? = credential?.id
+                        // Phone number selection success
+                        val phoneNumber = data.getStringExtra("phoneNumber")
                         pendingResult?.success(phoneNumber)
                     } else {
                         pendingResult?.success(null)
@@ -56,31 +64,39 @@ class OtpAutofillSmsPlugin : FlutterPlugin, MethodCallHandler,
         }
 
     companion object {
-        private const val channelName = "otp_autofill_sms"
+        private const val CHANNEL_NAME = "otp_autofill_sms"
         private const val REQUEST_RESOLVE_HINT = 1256
 
+
+        /**
+         * Setup method to initialize the plugin.
+         * @param plugin The instance of OtpAutofillSmsPlugin.
+         * @param binaryMessenger The BinaryMessenger for communication.
+         */
         @JvmStatic
         fun setup(plugin: OtpAutofillSmsPlugin, binaryMessenger: BinaryMessenger) {
-            plugin.channel = MethodChannel(binaryMessenger, channelName)
+            plugin.channel = MethodChannel(binaryMessenger, CHANNEL_NAME)
             plugin.channel?.setMethodCallHandler(plugin)
             plugin.binding?.addActivityResultListener(plugin.activityResultListener)
-
         }
     }
 
 
+    // This method is called when the plugin is attached to the Flutter engine.
     override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         setup(plugin = this, binding.binaryMessenger)
     }
 
+
+    // This method is called when the plugin is detached from the Flutter engine.
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         unregister()
     }
 
+
+    // This method is called when a method is called on the channel.
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
-
-
             "getPlatformVersion" -> {
                 result.success("Android ${Build.VERSION.RELEASE}")
             }
@@ -90,14 +106,12 @@ class OtpAutofillSmsPlugin : FlutterPlugin, MethodCallHandler,
                     val signature = MyApp(it).getAppSignatures()[0]
                     result.success(signature)
                 }
-
             }
 
             "startListening" -> {
                 this.pendingResult = result
                 receiver = SmsReceiver()
                 startListening()
-
             }
 
             "stopListening" -> {
@@ -108,62 +122,77 @@ class OtpAutofillSmsPlugin : FlutterPlugin, MethodCallHandler,
             "requestPhoneHint" -> {
                 this.pendingResult = result
                 requestHint()
-
             }
 
             else -> result.notImplemented()
         }
     }
 
+
+    /**
+     * Requests a phone number hint using the Google Identity API.
+     */
     private fun requestHint() {
         if (!isSimSupport()) {
             pendingResult?.success(null)
             return
         }
 
-        val hintRequest = HintRequest.Builder()
-            .setPhoneNumberIdentifierSupported(true)
-            .build()
+        // Initialize the new Identity API client
+        oneTapClient = Identity.getSignInClient(activity!!)
 
-        activity?.apply {
-            val intent = Credentials.getClient(this).getHintPickerIntent(hintRequest)
-            try {
-                startIntentSenderForResult(
-                    intent.intentSender,
-                    REQUEST_RESOLVE_HINT, null, 0, 0, 0
-                )
-            } catch (e: IntentSender.SendIntentException) {
-                e.printStackTrace()
+        // Build the GetPhoneNumberHintIntentRequest for phone number hint
+        val hintRequest = GetPhoneNumberHintIntentRequest.builder().build()
+
+        oneTapClient?.getPhoneNumberHintIntent(hintRequest)
+            ?.addOnSuccessListener { result ->
+                try {
+                    activity?.startIntentSenderForResult(
+                        result.intentSender,
+                        REQUEST_RESOLVE_HINT, null, 0, 0, 0
+                    )
+                } catch (e: IntentSender.SendIntentException) {
+                    e.printStackTrace()
+                }
             }
-        }
+            ?.addOnFailureListener { e ->
+                Log.e("OtpAutofillSmsPlugin", "Error retrieving phone number hint: ${e.message}")
+                pendingResult?.success(null)
+            }
     }
 
+
+    /**
+     * Checks if the device has SIM support.
+     * @return True if SIM is supported, false otherwise.
+     */
     private fun isSimSupport(): Boolean {
         val telephonyManager: TelephonyManager =
             activity!!.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-        return (telephonyManager.simState == TelephonyManager.SIM_STATE_ABSENT)
+        return (telephonyManager.simState != TelephonyManager.SIM_STATE_ABSENT)
     }
 
+
+    /**
+     * Starts listening for SMS messages using the SMS Retriever API.
+     */
+    @SuppressLint("UnspecifiedRegisterReceiverFlag")
     private fun startListening() {
         activity?.let {
             client = SmsRetriever.getClient(it)
         }
         val task = client?.startSmsRetriever()
         task?.addOnSuccessListener {
-            // Successfully started retriever, expect broadcast intent
             unregister()
-            Log.e(javaClass::getSimpleName.name, "task started")
+            Log.e(javaClass.simpleName, "SMS retriever started")
             receiver?.setSmsListener(this)
-
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 activity?.registerReceiver(
                     receiver, IntentFilter(SmsRetriever.SMS_RETRIEVED_ACTION),
                     Context.RECEIVER_EXPORTED
                 )
-            }
-            //
-            else {
+            } else {
                 activity?.registerReceiver(
                     receiver,
                     IntentFilter(SmsRetriever.SMS_RETRIEVED_ACTION)
@@ -172,18 +201,24 @@ class OtpAutofillSmsPlugin : FlutterPlugin, MethodCallHandler,
         }
     }
 
+
+    /**
+     * Unregisters the SMS receiver.
+     */
     private fun unregister() {
         alreadyCalledSmsRetrieve = false
-        if (receiver != null) {
+        receiver?.let {
             try {
-                activity?.unregisterReceiver(receiver)
-                Log.d(javaClass::getSimpleName.name, "task stoped")
+                activity?.unregisterReceiver(it)
+                Log.d(javaClass.simpleName, "SMS retriever stopped")
                 receiver = null
-            } catch (e: Exception) {
+            } catch (_: Exception) {
             }
         }
     }
 
+
+    // This method is called when an OTP is received.
     override fun onOtpReceived(message: String?) {
         message?.let {
             if (!alreadyCalledSmsRetrieve) {
@@ -193,28 +228,37 @@ class OtpAutofillSmsPlugin : FlutterPlugin, MethodCallHandler,
                 Log.d("onOtpReceived: ", "already called")
             }
         }
-
-    }
-
-    override fun onOtpTimeout() {
     }
 
 
+    // This method is called when the OTP retrieval times out.
+    override fun onOtpTimeout() {}
+
+
+    // This method is called when the plugin is attached to an activity.
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
         activity = binding.activity
         this.binding = binding
-        binding.addActivityResultListener(activityResultListener); }
+        binding.addActivityResultListener(activityResultListener)
+    }
 
+
+    // This method is called when the plugin is detached from an activity for configuration changes.
     override fun onDetachedFromActivityForConfigChanges() {
         unregister()
     }
 
+
+    // This method is called when the plugin is reattached to an activity for configuration changes.
     override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
         activity = binding.activity
         this.binding = binding
-        binding.addActivityResultListener(activityResultListener);
+        binding.addActivityResultListener(activityResultListener)
     }
 
+
+
+    // This method is called when the plugin is detached from an activity.
     override fun onDetachedFromActivity() {
         unregister()
     }
