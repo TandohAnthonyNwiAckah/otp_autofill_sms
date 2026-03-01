@@ -2,14 +2,14 @@ group = "com.tanacom.otp_autofill_sms"
 version = "1.0-SNAPSHOT"
 
 buildscript {
-    ext.kotlin_version = "1.8.22"
+    ext.kotlin_version = "2.3.0"
     repositories {
         google()
         mavenCentral()
     }
 
     dependencies {
-        classpath("com.android.tools.build:gradle:8.1.4")
+        classpath("com.android.tools.build:gradle:8.2.2")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
     }
 }
@@ -24,12 +24,13 @@ allprojects {
 apply plugin: "com.android.library"
 apply plugin: "kotlin-android"
 
+
 android {
     if (project.android.hasProperty("namespace")) {
         namespace = "com.tanacom.otp_autofill_sms"
     }
 
-    compileSdk = 34
+    compileSdk = 36
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -53,11 +54,11 @@ android {
 
     dependencies {
 //        implementation files('src/main/libs/flutter.jar')
-        implementation 'com.google.android.gms:play-services-auth:21.2.0'
-        implementation 'com.google.android.gms:play-services-auth-api-phone:18.1.0'
-        implementation "androidx.core:core-ktx:1.13.1"
+        implementation 'com.google.android.gms:play-services-auth:21.5.1'
+        implementation 'com.google.android.gms:play-services-auth-api-phone:18.3.0'
+        implementation "androidx.core:core-ktx:1.17.0"
         testImplementation("org.jetbrains.kotlin:kotlin-test")
-        testImplementation("org.mockito:mockito-core:5.2.0")
+        testImplementation("org.mockito:mockito-core:5.22.0")
 
     }
 

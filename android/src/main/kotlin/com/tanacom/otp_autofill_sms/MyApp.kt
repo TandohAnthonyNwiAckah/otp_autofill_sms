@@ -11,7 +11,6 @@ import android.util.Log
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
-import java.util.Arrays
 
 
 /**
@@ -51,7 +50,7 @@ class MyApp(context: Context) : ContextWrapper(context) {
                         PackageManager.GET_SIGNING_CERTIFICATES
                     ).signingInfo
 
-                    if (signingInfo.hasMultipleSigners()) {
+                    if (signingInfo!!.hasMultipleSigners()) {
                         signingInfo.apkContentsSigners
                     }
                     //
@@ -95,7 +94,7 @@ class MyApp(context: Context) : ContextWrapper(context) {
             var hashSignature = messageDigest.digest()
 
             // truncated into NUM_HASHED_BYTES
-            hashSignature = Arrays.copyOfRange(hashSignature, 0, NUM_HASHED_BYTES)
+            hashSignature = hashSignature.copyOfRange(0, NUM_HASHED_BYTES)
             // encode into Base64
             var base64Hash =
                 Base64.encodeToString(hashSignature, Base64.NO_PADDING or Base64.NO_WRAP)

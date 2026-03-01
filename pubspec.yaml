@@ -1,6 +1,6 @@
 name: otp_autofill_sms
 description: "A versatile and efficient solution designed to enhance the user experience by automating the process of filling in  OTPs sent via SMS."
-version: 1.0.0
+version: 1.1.0
 homepage: https://github.com/TandohAnthonyNwiAckah/otp_autofill_sms
 
 
